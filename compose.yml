@@ -1,0 +1,59 @@
+version: '3.8'
+services:
+  httpd:
+    # Apache on http://localhost serves from www and FastCGI proxies .php files to php-fpm:9000
+    build: ./docker/httpd-2.4
+    ports:
+      - "80:80"
+    volumes:
+      - "./www:/var/www/html"
+    depends_on:
+      - php-fpm
+    networks:
+      - app-network
+
+  php-fpm:
+    # Exposes the php-fpm FastCGI process on port 9000 for Apache
+    # Can access mariadb
+    build: ./docker/php-fpm-8.2
+    volumes:
+      - "./www:/var/www/html"
+    env_file:
+      - ./env/mariadb.env
+    depends_on:
+      - mariadb
+    networks:
+      - app-network
+
+  mariadb:
+    image: mariadb:10.8.3
+    ports:
+      - "3306:3306"
+    env_file:
+      - ./env/mariadb.env
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  phpmyadmin:
+    # Runs its own version of Apache exposed on http://localhost:8000
+    image: phpmyadmin
+    links:
+      - mariadb
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mariadb
+    env_file:
+      - ./env/mariadb.env
+    networks:
+      - app-network
+
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge
