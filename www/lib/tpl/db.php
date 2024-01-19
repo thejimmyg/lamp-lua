@@ -1,10 +1,5 @@
 <?php 
-$conn = new mysqli('p:' . $_ENV["MYSQL_HOST"], $_ENV["MYSQL_USER"], $_ENV["MYSQL_PASSWORD"]);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-} 
-header("Content-Type: application/json");
-$json = file_get_contents('php://input');
+include (PATH_TO_LIB . '/partial/1.php');
 if ($json) {
     $stmt = $conn->prepare("SELECT JSON_ARRAYAGG(SCHEMA_NAME) as json FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?");
     $n = 1;
@@ -12,7 +7,7 @@ if ($json) {
     $stmt->execute();
     $stmt->bind_result($out_json);
     while ($stmt->fetch()) {
-      echo $out_json;
+      echo htmlspecialchars($out_json, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
       break;
     }
 } else {
@@ -20,12 +15,11 @@ if ($json) {
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
-            echo $row["json"];
+            echo htmlspecialchars($row["json"], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
     	break;
         }
     } else {
         echo "{}";
     }
 }
-$conn->close();
-?>
+include (PATH_TO_LIB . '/partial/2.php');

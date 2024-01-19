@@ -6,7 +6,8 @@ services:
     ports:
       - "81:80"
     volumes:
-      - "./www:/var/www/html"
+      - "./www/html:/var/www/html"
+      - "./www/lib:/var/www/lib"
     depends_on:
       - php-fpm
     networks:
@@ -19,7 +20,8 @@ services:
     # Can access mariadb
     build: ./docker/php-fpm-8.2
     volumes:
-      - "./www:/var/www/html"
+      - "./www/html:/var/www/html"
+      - "./www/lib:/var/www/lib"
     env_file:
       - ./env/mariadb.env
     depends_on:
@@ -58,6 +60,15 @@ services:
     profiles:
       - debug
 
+  test:
+    build: ./docker/test
+    volumes:
+      - ./test:/test
+      - ./screenshots:/tmp/screenshots
+    networks:
+      - app-network
+    profiles:
+      - test
 
 volumes:
   db_data:

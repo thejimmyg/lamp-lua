@@ -3,14 +3,15 @@
 The approach in this project is to use domain specific languages for domain specific tasks:
 
 * HTTP - [Apache 2.4](https://httpd.apache.org/docs/2.4/) config format and [`.htaccess`](https://httpd.apache.org/docs/2.4/howto/htaccess.html) files
-* HTML - [PHP 8.2](https://www.php.net/) deployed via [PHP-FPM](https://www.php.net/manual/en/install.fpm.php)
-* JSON - SQL in [MariaDB 10.8.3](https://mariadb.com/kb/en/documentation/) via a small [PHP adapter](code/db.php) with a [phpMyAdmin](https://www.phpmyadmin.net/) admin interface
+* HTML - [PHP 8.2](https://www.php.net/) deployed via [PHP-FPM](https://www.php.net/manual/en/install.fpm.php) and [htmx](https://htmx.org/)
 * Ops - [Docker](https://www.docker.com/products/docker-desktop/)
+* CSS - [CSS Grid](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout) and [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties)
+* Tests - [Python 3.11](http://python.org) driving [Selenium WebDriver](https://selenium-python.readthedocs.io/) with Chrome, and also support to call an [Appium](http://appium.io/docs/en/2.4/) server for mobile testing
 
 Next:
 
-* Features - Gherkin with Behave in Python 3.11 driving Selenium with Chromedriver
-* iOS/Android - React Native Webview powered by htmx
+* JSON - [JSON Function in SQL](https://mariadb.com/kb/en/json-functions/) with [MariaDB 10.8.3](https://mariadb.com/kb/en/documentation/) via a small [PHP adapter](code/db.php) with a [phpMyAdmin](https://www.phpmyadmin.net/) admin interface
+* Apps - React Native Webview and Electron calling the existing HTML site with a bridge to native functionality
 
 The idea is that the resulting application can be deployed on commodity shared hosting as well as production cloud infrastructure, but that there isn't anything needed for development except Docker. This should lower the barrier to contribution, and lower the barrier to deployment.
 
@@ -44,13 +45,25 @@ You can see memory usage like this:
 docker stats $(docker-compose ps | awk 'NR>1 {print $1}')
 ```
 
+## Test
+
+Run the headless browser tests (you might need `sudo` on Linux depending on your docker setup):
+```sh
+docker-compose --profile test run test
+```
+```
+Creating lamp-82_test_run ... done
+...
+SUCCESS
+See the screenshots directory.
+```
 
 ## Curl
 
 ```sh
-$ curl http://localhost:81/db.php
+$ curl http://localhost:81/db
 ["information_schema","my_database"]
-$ curl -d 'my_database' http://localhost:81/db.php
+$ curl -d 'my_database' http://localhost:81/db
 ["my_database"]
 ```
 
