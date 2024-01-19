@@ -27,7 +27,7 @@ Linux - Install git, docker and docker compose, e.g. with `sudo apt install git 
 
 Windows - Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and [Git for Windows](https://github.com/git-for-windows/git) (which also installs Git Bash and make which you'll need) then load a Git Bash shell.
 
-Now you can just run this command (Linux uses may need to add their user to the `docker` group or use `sudo` before the command will run):
+Now you can just run this command (Linux users may need to add their user to the `docker` group or use `sudo` before the command will run):
 
 ```sh
 docker-compose --profile serve --profile debug up --remove-orphans --build
@@ -76,3 +76,13 @@ Or use docker for CLI access. The settings you choose must match those in `env/m
 ```sh
 docker-compose run -it mariadb  mariadb -h mariadb -u user -p
 ```
+
+## htmx
+
+By default htmx is loaded from the CDN. If you want to load it yourself, you can get the latest version with:
+
+```sh
+curl https://unpkg.com/htmx.org/dist/htmx.min.js -L -o www/html/htmx.min.js
+```
+
+Then update the script tag in `www/lib/partial/1.php`.

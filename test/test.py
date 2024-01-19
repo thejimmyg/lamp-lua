@@ -71,6 +71,9 @@ def passed(driver):
     sys.stdout.flush()
 
 
+def navigate(driver, link_selector):
+    driver.find_element(By.CSS_SELECTOR, link_selector).click()
+
 def main():
 
     driver = auto_load_driver()
@@ -80,6 +83,24 @@ def main():
     assert 'Home' == actual, actual
     passed(driver)
 
+    # Navigate via links
+    navigate(driver, "#nav-db-link")
+    actual = driver.find_element(By.CSS_SELECTOR, f"article").text
+    assert '["information_schema","my_database"]' == actual, actual
+    passed(driver)
+
+    navigate(driver, "#nav-example-404-link")
+    actual = driver.find_element(By.CSS_SELECTOR, f"article").text
+    assert 'Not Found' == actual, actual
+    passed(driver)
+
+    navigate(driver, "#nav-home-link")
+    actual = driver.find_element(By.CSS_SELECTOR, f"article").text
+    assert 'Home' == actual, actual
+    passed(driver)
+
+
+    # Navigate via page loads
     driver.get('http://httpd:80/db')
     actual = driver.find_element(By.CSS_SELECTOR, f"article").text
     assert '["information_schema","my_database"]' == actual, actual
@@ -89,6 +110,12 @@ def main():
     actual = driver.find_element(By.CSS_SELECTOR, f"article").text
     assert 'Not Found' == actual, actual
     passed(driver)
+
+    driver.get('http://httpd:80')
+    actual = driver.find_element(By.CSS_SELECTOR, f"article").text
+    assert 'Home' == actual, actual
+    passed(driver)
+
 
     driver.quit()
     print('\nSUCCESS')
