@@ -66,9 +66,7 @@ You can change the value of `-e 'URL=http://httpd:80'` if you want to test a dif
 
 ```sh
 $ curl http://localhost:81/db
-["information_schema","my_database"]
-$ curl -d 'my_database' http://localhost:81/db
-["my_database"]
+{"Hello": "world"}
 ```
 
 ## MariaDB
