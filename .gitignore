@@ -1,2 +1,5 @@
 .DS_Store
+/prod
 /screenshots
+/www/html/config.php
+/www/lib/config.php

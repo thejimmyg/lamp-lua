@@ -30,7 +30,7 @@ Windows - Install [Docker Desktop](https://www.docker.com/products/docker-deskto
 Now you can just run this command (Linux users may need to add their user to the `docker` group or use `sudo` before the command will run):
 
 ```sh
-docker-compose --profile serve --profile debug up --remove-orphans --build
+docker-compose stop && docker-compose --profile serve --profile debug up --remove-orphans --build
 ```
 
 This creates a persistent volume for the MariaDB data (in the main docker volumes part of the filesystem, not the local directory) and starts all the services in the *serve* profile (`httpd`, `mariadb`, `php-fpm`) and the *debug* profile (`phpmyadmin`).
@@ -48,15 +48,19 @@ docker stats $(docker-compose ps | awk 'NR>1 {print $1}')
 ## Test
 
 Run the headless browser tests (you might need `sudo` on Linux depending on your docker setup):
+
 ```sh
-docker-compose --profile test run test
+docker-compose build test && mkdir -p screenshots && docker-compose --profile test run --user $(id -u) -e 'URL=http://httpd:80' test
 ```
 ```
 Creating lamp-82_test_run ... done
-...
+Testing against: http://httpd:80
+......
 SUCCESS
 See the screenshots directory.
 ```
+
+You can change the value of `-e 'URL=http://httpd:80'` if you want to test a different URL instead, for example your staging environment.
 
 ## Curl
 
@@ -86,3 +90,33 @@ curl https://unpkg.com/htmx.org/dist/htmx.min.js -L -o www/html/htmx.min.js
 ```
 
 Then update the script tag in `www/lib/partial/1.php`.
+
+## Prod
+
+```
+$ tree prod
+prod
+└── www
+    ├── html
+    │   └── config.php
+    └── lib
+        └── config.php
+
+4 directories, 2 files
+```
+```
+$ cat prod/www/html/config.php
+<?php
+define('PATH_TO_LIB', '/var/www/lib');
+```
+
+```
+$ cat prod/www/lib/config.php
+<?php
+define('MYSQL_HOST', 'mariadb');
+define('MYSQL_USER', 'user');
+define('MYSQL_PASSWORD', "password");
+define('MYSQL_DATABASE', "my_database");
+```
+
+Then upload the prod configs respectively into the same directories you've uploaded the rest of the `www/lib` and `www/html` directories on the server.

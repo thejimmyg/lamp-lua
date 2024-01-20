@@ -51,18 +51,26 @@ def auto_load_driver():
         driver = webdriver.Chrome(options=chrome_options)
         driver.set_window_size(1920, 1080)
         # It is on port 80 internally on the docker network for some reason
-        driver.get('http://httpd:80/')
+        url = get_target_url()
+        driver.get(url)
     else:
         raise Exception(f"Unknown driver {repr(driver_name)}, expected 'chromedriver' or 'appium'")
     return driver
 
+import datetime
 import sys
 from selenium.webdriver.common.by import By
 
-screenshot_counter = [1]
+screenshot_counter = [1, datetime.datetime.now().isoformat()[:19]]
 def screenshot(driver):
-    driver.save_screenshot(f'/tmp/screenshots/{str(screenshot_counter[0]).zfill(5)}.png')
+    counter, now = screenshot_counter
+    driver.save_screenshot(f'/tmp/screenshots/{now}-{str(counter).zfill(5)}.png')
     screenshot_counter[0] += 1
+
+
+def get_target_url():
+    import os
+    return os.environ.get('URL', 'http://httpd:80')
 
 
 def passed(driver):
@@ -74,52 +82,89 @@ def passed(driver):
 def navigate(driver, link_selector):
     driver.find_element(By.CSS_SELECTOR, link_selector).click()
 
-def main():
 
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+
+
+class text_to_be_exact_stripping_whitespace(object):
+    def __init__(self, locator, text_):
+        self.locator = locator
+        self.text = text_
+
+    def __call__(self, driver):
+        element_text = driver.find_element(*self.locator).text
+        # print(element_text.strip(), self.text)
+        return element_text.strip() == self.text
+
+
+def wait_for_element_to_have_text(driver, selector, expected_text):
+    locator = (By.CSS_SELECTOR, selector)
+    wait = WebDriverWait(driver, 10)
+    try:
+        wait.until(text_to_be_exact_stripping_whitespace(locator, expected_text))
+    except:
+        print(driver.page_source)
+        raise
+    return driver.find_element(By.CSS_SELECTOR, selector).text
+
+
+def main():
     driver = auto_load_driver()
     screenshot(driver)
 
-    actual = driver.find_element(By.CSS_SELECTOR, f"article").text
-    assert 'Home' == actual, actual
-    passed(driver)
+    expected_json = '{"hello": "world"}'
+
+    url = get_target_url()
+    print('Testing against:', url)
 
     # Navigate via links
     navigate(driver, "#nav-db-link")
-    actual = driver.find_element(By.CSS_SELECTOR, f"article").text
-    assert '["information_schema","my_database"]' == actual, actual
+    expected = expected_json
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
     passed(driver)
 
     navigate(driver, "#nav-example-404-link")
-    actual = driver.find_element(By.CSS_SELECTOR, f"article").text
-    assert 'Not Found' == actual, actual
+    expected = 'Not Found'
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
     passed(driver)
 
     navigate(driver, "#nav-home-link")
-    actual = driver.find_element(By.CSS_SELECTOR, f"article").text
-    assert 'Home' == actual, actual
+    expected = 'Home'
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
     passed(driver)
-
 
     # Navigate via page loads
-    driver.get('http://httpd:80/db')
-    actual = driver.find_element(By.CSS_SELECTOR, f"article").text
-    assert '["information_schema","my_database"]' == actual, actual
+    driver.get(url + '/db')
+    expected = expected_json
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
     passed(driver)
 
-    driver.get('http://httpd:80/404')
-    actual = driver.find_element(By.CSS_SELECTOR, f"article").text
-    assert 'Not Found' == actual, actual
+    driver.get(url + '/404')
+    expected = 'Not Found'
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
     passed(driver)
 
-    driver.get('http://httpd:80')
-    actual = driver.find_element(By.CSS_SELECTOR, f"article").text
-    assert 'Home' == actual, actual
+    driver.get(url)
+    expected = 'Home'
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
     passed(driver)
 
 
     driver.quit()
     print('\nSUCCESS')
     print('See the screenshots directory.')
+
 
 if __name__ == '__main__':
     main()

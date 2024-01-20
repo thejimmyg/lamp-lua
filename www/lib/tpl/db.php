@@ -11,7 +11,7 @@ if ($json) {
       break;
     }
 } else {
-    $sql = "SELECT JSON_ARRAYAGG(SCHEMA_NAME) as json FROM INFORMATION_SCHEMA.SCHEMATA";
+    $sql = "SELECT '{\"hello\": \"world\"}' as json;" ; //JSON_ARRAYAGG(SCHEMA_NAME) as json FROM INFORMATION_SCHEMA.SCHEMATA";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {

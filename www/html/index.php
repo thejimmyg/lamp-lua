@@ -1,6 +1,5 @@
 <?php
- 
-include 'config.php';
+require './config.php';
 
 $filename = isset($_GET["filename"]) ? $_GET["filename"] : '';
 switch ($filename) {

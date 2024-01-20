@@ -1,5 +1,8 @@
 RewriteEngine on
 
+RewriteCond %{THE_REQUEST} \.php[\s?/]
+RewriteRule ^ /404
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*) index.php?filename=$1

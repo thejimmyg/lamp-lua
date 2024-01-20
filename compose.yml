@@ -8,6 +8,8 @@ services:
     volumes:
       - "./www/html:/var/www/html"
       - "./www/lib:/var/www/lib"
+      - "./test/www/html/config.php:/var/www/html/config.php"
+      - "./test/www/lib/config.php:/var/www/lib/config.php"
     depends_on:
       - php-fpm
     networks:
@@ -22,6 +24,8 @@ services:
     volumes:
       - "./www/html:/var/www/html"
       - "./www/lib:/var/www/lib"
+      - "./test/www/html/config.php:/var/www/html/config.php"
+      - "./test/www/lib/config.php:/var/www/lib/config.php"
     env_file:
       - ./env/mariadb.env
     depends_on:
