@@ -107,12 +107,14 @@ prod
 ```
 $ cat prod/www/html/config.php
 <?php
+error_reporting(0);
 define('PATH_TO_LIB', '/var/www/lib');
 ```
 
 ```
 $ cat prod/www/lib/config.php
 <?php
+error_reporting(0);
 define('MYSQL_HOST', 'mariadb');
 define('MYSQL_USER', 'user');
 define('MYSQL_PASSWORD', "password");
