@@ -75,7 +75,7 @@ Access via phpMyAdmin on http://localhost:82 to set up a database. Use the usern
 Or use docker for CLI access. The settings you choose must match those in `env/mariadb.env` that MariaDB was started with:
 
 ```sh
-docker-compose run mariadb mariadb -h mariadb -u user -p
+docker-compose run mariadb mariadb -h mariadb -u user my_database -p
 ```
 
 To delete all data used by the compose volumes you can run:

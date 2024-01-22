@@ -9,3 +9,10 @@ CREATE TABLE IF NOT EXISTS user_groups (
     groupname VARCHAR(255) NOT NULL,
     FOREIGN KEY (username) REFERENCES users(username)
 );
+
+CREATE TABLE sessions (
+    id VARCHAR(255) NOT NULL,
+    session_data TEXT,
+    expires INT DEFAULT 0,
+    PRIMARY KEY (id)
+);
