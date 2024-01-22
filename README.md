@@ -2,8 +2,7 @@
 
 The approach in this project is to use domain specific languages for domain specific tasks:
 
-* HTTP - [Apache 2.4](https://httpd.apache.org/docs/2.4/) config format and [`.htaccess`](https://httpd.apache.org/docs/2.4/howto/htaccess.html) files
-* HTML - [PHP 8.2](https://www.php.net/) deployed via [PHP-FPM](https://www.php.net/manual/en/install.fpm.php) and [htmx](https://htmx.org/)
+* HTTP - [Apache 2.4](https://httpd.apache.org/docs/2.4/) config format with [mod_lua](https://httpd.apache.org/docs/2.4/mod/mod_lua.html) and [`.htaccess`](https://httpd.apache.org/docs/2.4/howto/htaccess.html) files
 * Ops - [Docker](https://www.docker.com/products/docker-desktop/)
 * CSS - [CSS Grid](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout) and [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties)
 * Tests - [Python 3.11](http://python.org) driving [Selenium WebDriver](https://selenium-python.readthedocs.io/) with Chrome, and also support to call an [Appium](http://appium.io/docs/en/2.4/) server for mobile testing
@@ -76,7 +75,19 @@ Access via phpMyAdmin on http://localhost:82 to set up a database. Use the usern
 Or use docker for CLI access. The settings you choose must match those in `env/mariadb.env` that MariaDB was started with:
 
 ```sh
-docker-compose run -it mariadb  mariadb -h mariadb -u user -p
+docker-compose run mariadb mariadb -h mariadb -u user -p
+```
+
+To delete all data used by the compose volumes you can run:
+
+```sh
+docker-compose down -v
+```
+
+To create new users:
+
+```sh
+docker-compose run httpd /usr/bin/user.sh james
 ```
 
 ## htmx
