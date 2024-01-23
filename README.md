@@ -1,5 +1,11 @@
 # README
 
+You can visit http://localhost:81/login to login, then visit http://localhost:81/private/asf. It uses a cookie which I haven't set an expiry for yet. It seems to go when you close the browser.
+
+
+## Old
+
+
 The approach in this project is to use domain specific languages for domain specific tasks:
 
 * HTTP - [Apache 2.4](https://httpd.apache.org/docs/2.4/) config format with [mod_lua](https://httpd.apache.org/docs/2.4/mod/mod_lua.html) and [`.htaccess`](https://httpd.apache.org/docs/2.4/howto/htaccess.html) files

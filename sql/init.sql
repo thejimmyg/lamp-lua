@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS user_groups (
 
 CREATE TABLE sessions (
     id VARCHAR(255) NOT NULL,
-    session_data TEXT,
+    username VARCHAR(255) NOT NULL,
     expiry BIGINT DEFAULT 0,
     PRIMARY KEY (id)
 );
