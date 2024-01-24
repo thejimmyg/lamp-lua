@@ -1,20 +1,11 @@
 function handle(r)
     r:puts('<!--#include virtual="/include/top.shtml" -->')
-    r:puts('   <title>Home</title>')
+    r:puts('   <title>Home</title>\n')
     r:puts('<!--#include virtual="/include/body.shtml" -->')
-    r:puts('   <header>')
-    r:puts('     Home')
-    r:puts('   </header>')
-    r:puts('   <input type="checkbox" id="menu-toggle" class="menu-toggle" />')
-    r:puts('   <label for="menu-toggle" class="menu-icon">')
-    r:puts('     <span></span> <!-- This represents the middle line of the hamburger -->')
-    r:puts('   </label>')
-    r:puts('   <nav>')
-    r:puts('     <a href="/" id="nav-home-link">Home</a><br>')
-    r:puts('     <a href="/db" id="nav-db-link">DB</a><br>')
-    r:puts('     <a href="/404" id="nav-example-404-link">Not Found</a>')
-    r:puts('   </nav>')
-    r:puts('   <article>')
+    r:puts('   <header>\n')
+    r:puts('     Home\n')
+    r:puts('   </header>\n')
+    r:puts('   <article>\n')
     local database, err = r:dbacquire("mod_dbd")
     if not err then
         local statement, errmsg = database:prepared(r, "james")
@@ -33,9 +24,9 @@ function handle(r)
     else
         r:puts("Could not connect to the database: " .. err)
     end
-    r:puts('   </article>')
-    r:puts('   <footer>Footer</footer>')
-    r:puts('<!--#include virtual="/include/bottom.shtml" --> ')
+    r:puts('   </article>\n')
+    r:puts('   <footer>Footer</footer>\n')
+    r:puts('<!--#include virtual="/include/bottom.shtml" -->\n')
     r.content_type = "text/html"  -- Sets the Content-Type header to text/html
     return apache2.OK
 end
