@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   httpd:
-    # Apache on http://localhost serves from www and FastCGI proxies .php files to php-fpm:9000
+    # Apache on http://localhost serves from www
     build: ./docker/httpd-2.4
     ports:
       - "81:80"
@@ -10,8 +10,7 @@ services:
       - "./bin/wait-for-mariadb.sh:/usr/bin/wait-for-mariadb.sh"
       - "./www/html:/var/www/html"
       - "./www/lib:/var/www/lib"
-      - "./test/www/html/config.php:/var/www/html/config.php"
-      - "./test/www/lib/config.php:/var/www/lib/config.php"
+      - "./www/include:/var/www/include"
     env_file:
       - ./env/mariadb.env
     networks:

@@ -1,0 +1,20 @@
+ <!--#include virtual="/include/top.shtml" --> 
+    <title>Home</title>
+ <!--#include virtual="/include/body.shtml" --> 
+    <header>
+      Home
+    </header>
+    <input type="checkbox" id="menu-toggle" class="menu-toggle" />
+    <label for="menu-toggle" class="menu-icon">
+      <span></span> <!-- This represents the middle line of the hamburger -->
+    </label>
+    <nav>
+      <a href="/" id="nav-home-link">Home</a><br>
+      <a href="/db" id="nav-db-link">DB</a><br>
+      <a href="/404" id="nav-example-404-link">Not Found</a>
+    </nav>
+    <article>
+      Home
+    </article>
+    <footer>Footer</footer>
+ <!--#include virtual="/include/bottom.shtml" --> 
