@@ -117,14 +117,13 @@ def main():
     driver = auto_load_driver()
     screenshot(driver)
 
-    expected_json = '{"hello": "world"}'
 
     url = get_target_url()
     print('Testing against:', url)
 
     # Navigate via links
     navigate(driver, "#nav-db-link")
-    expected = expected_json
+    expected = '{"hello": "world"}'
     actual = wait_for_element_to_have_text(driver, "article", expected)
     assert expected == actual, actual
     passed(driver)
@@ -143,7 +142,7 @@ def main():
 
     # Navigate via page loads
     driver.get(url + '/db')
-    expected = expected_json
+    expected = '{"hello": "world"}'
     actual = wait_for_element_to_have_text(driver, "article", expected)
     assert expected == actual, actual
     passed(driver)
@@ -158,6 +157,16 @@ def main():
     expected = 'Home'
     actual = wait_for_element_to_have_text(driver, "article", expected)
     assert expected == actual, actual
+    passed(driver)
+
+    # Check server side includes work
+    driver.get(url + '/example')
+    expected = 'Example'
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
+    assert '<head>' in driver.page_source
+    assert '<body ' in driver.page_source
+    assert '</body>' in driver.page_source
     passed(driver)
 
 

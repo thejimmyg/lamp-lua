@@ -1,88 +1,50 @@
+local template = require('template')
+
 function handle(r)
-    r:puts('<!--#include virtual="/include/top.shtml" -->')
-    r:puts('   <title>Home</title>\n')
-    r:puts('<!--#include virtual="/include/body.shtml" -->')
-    r:puts('   <header>\n')
-    r:puts('     Home\n')
-    r:puts('   </header>\n')
-    r:puts('   <article>\n')
-    local database, err = r:dbacquire("mod_dbd")
-    if not err then
-        local statement, errmsg = database:prepared(r, "james")
-        if not errmsg then
-            local results, errmsg = statement:select()
-            if not err then
-                local rows = results(0) -- fetch all rows synchronously
-                for k, row in pairs(rows) do
-                    r:puts( string.format("Name: %s<br/>", row[1]))
-                end
-            else
-                r:puts("Database query error: " .. err)
-            end
-        end
-        database:close()
-    else
-        r:puts("Could not connect to the database: " .. err)
-    end
-    r:puts('   </article>\n')
-    r:puts('   <footer>Footer</footer>\n')
-    r:puts('<!--#include virtual="/include/bottom.shtml" -->\n')
+    local QUERY, QUERY_MULTI = r:parseargs()
+    local path = QUERY['path']
+    r.status = 200
     r.content_type = "text/html"  -- Sets the Content-Type header to text/html
+    if path == '/' then
+        r:puts(template.Base:new('Home', 'Home'):render())
+    elseif path == '/db' then
+        r:puts(template.Base:new('DB', index(r)):render())
+    elseif path == "/include/top.shtml" then
+        r:puts(template.top_shtml:render())
+    elseif path == "/include/body.shtml" then
+        r:puts(template.body_shtml:render())
+    elseif path == "/include/bottom.shtml" then
+        r:puts(template.bottom_shtml:render())
+    else
+        r.status = 404
+        r:puts(template.Base:new('Not Found', 'Not Found'):render())
+    end
     return apache2.OK
 end
 
---<?php
---require './config.php';
---
---$filename = isset($_GET["filename"]) ? $_GET["filename"] : '';
---switch ($filename) {
---    case '':
---	$PAGE_TITLE = "Home";
---        include (PATH_TO_LIB . '/tpl/home.php');
---        break;
---
---    case 'db':
---	$PAGE_TITLE = "DB";
---        include (PATH_TO_LIB . '/inc/db.php');
---        include (PATH_TO_LIB . '/tpl/db.php');
---        break;
---
---    default:
---	$PAGE_TITLE = "Not Found";
---        header('HTTP/1.1 404 Not Found');
---        include (PATH_TO_LIB . '/tpl/404.php');
---        break;
---}
+function index(r)
+    local dbh, err = r:dbacquire("mod_dbd")
+    if err then
+        r:debug('Could not acquire a connection: ' .. err)
+        return 500
+    end
+    local statement, err = dbh:prepared(r, "index")
+    if err then
+        r:debug('Could not get the index prepared statement: ' .. err)
+        return 500
+    end
+    local res, err = statement:select()
+    if err then
+        r:debug('Could not get execute the index select statement: ' .. err)
+        return 500
+    end
+    local row = res(1)
+    for k,v in pairs(row) do
+        r:debug('row ' .. k .. ', ' .. v)
+    end
+    dbh:close()
 
-
--- <?php
--- include (PATH_TO_LIB . '/partial/1.php');
--- if ($json) {
---     $stmt = $conn->prepare("SELECT JSON_ARRAYAGG(SCHEMA_NAME) as json FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?");
---     $n = 1;
---     $stmt->bind_param("s",  $json); // "s" means that $json is bound as a string
---     $stmt->execute();
---     $stmt->bind_result($out_json);
---     while ($stmt->fetch()) {
---       echo htmlspecialchars($out_json, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
---       break;
---     }
--- } else {
---     $sql = "SELECT '{\"hello\": \"world\"}' as json;" ; //JSON_ARRAYAGG(SCHEMA_NAME) as json FROM INFORMATION_SCHEMA.SCHEMATA";
---     $result = $conn->query($sql);
---     if ($result->num_rows > 0) {
---         while($row = $result->fetch_assoc()) {
---             echo htmlspecialchars($row["json"], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
---     	break;
---         }
---     } else {
---         echo "{}";
---     }
--- }
--- include (PATH_TO_LIB . '/partial/2.php');
-
-
--- <?php
--- include (PATH_TO_LIB . '/partial/1.php');
--- echo 'Not Found';
--- include (PATH_TO_LIB . '/partial/2.php');
+    local json = row[1]
+    r:debug('Got JSON: ' .. json)
+    return json
+end

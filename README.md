@@ -1,24 +1,16 @@
 # README
 
-You can visit http://localhost:81/login to login, then visit http://localhost:81/private/asf. It uses a cookie which I haven't set an expiry for yet. It seems to go when you close the browser.
-
-
-## Old
-
-
 The approach in this project is to use domain specific languages for domain specific tasks:
 
 * HTTP - [Apache 2.4](https://httpd.apache.org/docs/2.4/) config format with [mod_lua](https://httpd.apache.org/docs/2.4/mod/mod_lua.html) and [`.htaccess`](https://httpd.apache.org/docs/2.4/howto/htaccess.html) files
 * Ops - [Docker](https://www.docker.com/products/docker-desktop/)
 * CSS - [CSS Grid](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout) and [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties)
 * Tests - [Python 3.11](http://python.org) driving [Selenium WebDriver](https://selenium-python.readthedocs.io/) with Chrome, and also support to call an [Appium](http://appium.io/docs/en/2.4/) server for mobile testing
-
-Next:
-
 * JSON - [JSON Function in SQL](https://mariadb.com/kb/en/json-functions/) with [MariaDB 10.8.3](https://mariadb.com/kb/en/documentation/) via a small [PHP adapter](code/db.php) with a [phpMyAdmin](https://www.phpmyadmin.net/) admin interface
 * Apps - React Native Webview and Electron calling the existing HTML site with a bridge to native functionality
 
-The idea is that the resulting application can be deployed on commodity shared hosting as well as production cloud infrastructure, but that there isn't anything needed for development except Docker. This should lower the barrier to contribution, and lower the barrier to deployment.
+The idea is that the resulting application can be deployed on commodity VPS hosting as well as production cloud infrastructure, but that there isn't anything needed for development except Docker. This should lower the barriers to contribution and to deployment.
+
 
 ## Getting Started Locally
 
@@ -50,6 +42,17 @@ You can see memory usage like this:
 docker stats $(docker-compose ps | awk 'NR>1 {print $1}')
 ```
 
+## Functionality
+
+You can visit [http://localhost:81/login](http://localhost:81/login) to login, then visit [http://localhost:81/private/asf](http://localhost:81/private/asf). It uses a cookie which I haven't set an expiry for yet. It seems to go when you close the browser.
+
+You'll also see pages at `/`, `/db` and `/example` as well as a default 404 page.
+
+Most of the pages are served by `www/lib/index.lua`. The `/example` page is served via `www/html/example/index.shtml` which uses server side includes. The paths to include actually resolve to `www/lib/index.lua` as well and used both for server-side includes and in the base template that the other pages use.
+
+The blocks in the template are named **areas** to match the terminology of CSS Grid.
+
+
 ## Test
 
 Run the headless browser tests (you might need `sudo` on Linux depending on your docker setup):
@@ -58,7 +61,7 @@ Run the headless browser tests (you might need `sudo` on Linux depending on your
 docker-compose build test && mkdir -p screenshots && docker-compose --profile test run --user $(id -u) -e 'URL=http://httpd:80' test
 ```
 ```
-Creating lamp-82_test_run ... done
+Creating lamp-lua_test_run ... done
 Testing against: http://httpd:80
 ......
 SUCCESS
@@ -67,12 +70,17 @@ See the screenshots directory.
 
 You can change the value of `-e 'URL=http://httpd:80'` if you want to test a different URL instead, for example your staging environment.
 
+At the moment the tests don't test login, private directory functionality or server side includes.
+
+
 ## Curl
+
+This makes a real MariaDB query to render the JSON `{"hello": "world"}`.
 
 ```sh
 $ curl http://localhost:81/db
-{"Hello": "world"}
 ```
+
 
 ## MariaDB
 
@@ -104,36 +112,4 @@ By default htmx is loaded from the CDN. If you want to load it yourself, you can
 curl https://unpkg.com/htmx.org/dist/htmx.min.js -L -o www/html/htmx.min.js
 ```
 
-Then update the script tag in `www/lib/partial/1.php`.
-
-## Prod
-
-```
-$ tree prod
-prod
-└── www
-    ├── html
-    │   └── config.php
-    └── lib
-        └── config.php
-
-4 directories, 2 files
-```
-```
-$ cat prod/www/html/config.php
-<?php
-error_reporting(0);
-define('PATH_TO_LIB', '/var/www/lib');
-```
-
-```
-$ cat prod/www/lib/config.php
-<?php
-error_reporting(0);
-define('MYSQL_HOST', 'mariadb');
-define('MYSQL_USER', 'user');
-define('MYSQL_PASSWORD', "password");
-define('MYSQL_DATABASE', "my_database");
-```
-
-Then upload the prod configs respectively into the same directories you've uploaded the rest of the `www/lib` and `www/html` directories on the server.
+Then update the `top_shtml` variable in `var/lib/index.lua` to set the script tag.

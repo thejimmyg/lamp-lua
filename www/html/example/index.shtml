@@ -2,9 +2,9 @@
     <title>Home</title>
  <!--#include virtual="/include/body.shtml" --> 
     <header>
-      Home
+      Example
     </header>
     <article>
-      Home
+      Example
     </article>
  <!--#include virtual="/include/bottom.shtml" --> 
