@@ -1,4 +1,4 @@
-HTML = {}
+local HTML = {}
 HTML.__index = HTML
 
 function HTML:new(s)
@@ -7,7 +7,7 @@ function HTML:new(s)
     return newObj
 end
 
-function escape_html(str)
+local function escape_html(str)
     local map = {["&"] = "&amp;", ["<"] = "&lt;", [">"] = "&gt;", ['"'] = "&quot;", ["'"] = "&#39;"}
     return (str:gsub('[&<>"\']', map))
 end
@@ -25,6 +25,7 @@ function HTML:__concat(other)
     end
     return HTML:new(self .. other)
 end
+
 function HTML:render()
     return self.str
 end
@@ -52,6 +53,9 @@ local bottom_shtml = HTML:new([[    <input type="checkbox" id="menu-toggle" clas
     <nav>
       <a href="/" id="nav-home-link">Home</a><br>
       <a href="/db" id="nav-db-link">DB</a><br>
+      <a href="/login" id="nav-login-link">Login</a><br>
+      <a href="/logout" id="nav-logout-link">Logout</a><br>
+      <a href="/private/" id="nav-private-link">Private</a><br>
       <a href="/404" id="nav-example-404-link">Not Found</a>
     </nav>
     <footer>Footer</footer>
@@ -69,7 +73,7 @@ local bottom_shtml = HTML:new([[    <input type="checkbox" id="menu-toggle" clas
 
 
 
-Base = {}
+local Base = {}
 Base.__index = Base
 
 function Base:new(title, article)
@@ -107,10 +111,9 @@ function Base:render()
     ):render()
 end
 
-
-
+-- If run on the command line:
 if arg then
-    Child = setmetatable({}, Base)
+    local Child = setmetatable({}, Base)
     
     function Child:new(title)
         local newObj = setmetatable(Base:new(title), self)
@@ -127,7 +130,6 @@ if arg then
     print(baseTemplate:render())
     print(childTemplate:render())
 end
-
 
 
 -- Use as a module
