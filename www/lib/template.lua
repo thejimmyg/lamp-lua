@@ -1,17 +1,25 @@
+-- Escapes special HTML characters in a string to prevent XSS
+local function escape_html(str)
+    assert(type(str) == "string", "String value expected for HTML escaping")
+    local map = {["&"] = "&amp;", ["<"] = "&lt;", [">"] = "&gt;", ['"'] = "&quot;", ["'"] = "&#39;"}
+    return (str:gsub('[&<>"\']', map))
+end
+
+
+-- HTML class for safe HTML string manipulation and rendering
+
 local HTML = {}
 HTML.__index = HTML
 
+-- Constructor for HTML class
 function HTML:new(s)
+    assert(type(s) == "string", "String value expected")
     local newObj = setmetatable({}, self)
     newObj.str = s or ""
     return newObj
 end
 
-local function escape_html(str)
-    local map = {["&"] = "&amp;", ["<"] = "&lt;", [">"] = "&gt;", ['"'] = "&quot;", ["'"] = "&#39;"}
-    return (str:gsub('[&<>"\']', map))
-end
-
+-- Concatenation method for HTML objects, with automatic escaping for strings
 function HTML:__concat(other)
     if getmetatable(other) ~= HTML then
         other = escape_html(tostring(other))
@@ -26,11 +34,15 @@ function HTML:__concat(other)
     return HTML:new(self .. other)
 end
 
+-- Renders the HTML object to a string
 function HTML:render()
     return self.str
 end
 
 
+-- Example HTML segments
+
+-- Top part of the HTML document
 local top_shtml = HTML:new([[<!doctype html>
 <html lang="en-US">
   <head>
@@ -41,11 +53,13 @@ local top_shtml = HTML:new([[<!doctype html>
 ]])
 
 
+-- End of head and start of body, including the htmx hx-boost parameter for PJAX
 local body_shtml = HTML:new([[  </head>
   <body hx-boost="true">
 ]])
 
 
+-- Bottom part of the HTML document
 local bottom_shtml = HTML:new([[    <input type="checkbox" id="menu-toggle" class="menu-toggle" />
     <label for="menu-toggle" class="menu-icon">
       <span></span> <!-- This represents the middle line of the hamburger -->
@@ -72,17 +86,25 @@ local bottom_shtml = HTML:new([[    <input type="checkbox" id="menu-toggle" clas
 </html>]])
 
 
+-- Base class for templating
 
 local Base = {}
 Base.__index = Base
 
+-- Constructor for Base class
 function Base:new(title, article)
+    assert(
+        (type(title) == "string" or getmetatable(title) == HTML or title == nil) and
+        (type(article) == "string" or getmetatable(article) == HTML or article == nil),
+        "String, HTML instance, or nil values expected for title and article"
+    )
     local newObj = setmetatable({}, self)
     newObj['title'] = title or ''
     newObj['article'] = article or "Default Article"
     return newObj
 end
 
+-- Methods for different areas of the template
 function Base:title_area()
     return self.title
 end
@@ -99,6 +121,7 @@ function Base:article_area()
     return self.article
 end
 
+-- Renders the complete HTML document
 function Base:render()
     return (
         top_shtml .. 
@@ -111,8 +134,11 @@ function Base:render()
     ):render()
 end
 
--- If run on the command line:
+
+-- Command-line execution example
+
 if arg then
+    -- Child class example
     local Child = setmetatable({}, Base)
     
     function Child:new(title)
@@ -125,6 +151,7 @@ if arg then
         return "Custom Body"
     end
     
+    -- Usage
     local baseTemplate = Base:new('Home')
     local childTemplate = Child:new('Child')
     print(baseTemplate:render())
@@ -132,7 +159,7 @@ if arg then
 end
 
 
--- Use as a module
+-- Module export
 local M = {
     HTML = HTML,
     Base = Base,
