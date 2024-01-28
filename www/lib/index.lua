@@ -24,6 +24,7 @@ local function handle_paths(r, path, dbh)
         r:puts(template.bottom_shtml:render())
         return apache2.OK
     else
+        r:err('Could not find path: ' .. path)
         r.status = 404
         r:puts(template.Base:new('Not Found', 'Not Found'):render())
         return apache2.OK
@@ -34,10 +35,18 @@ end
 function handle(r)
     local query, query_multi = r:parseargs()
     local path = query['path']
+    local error_code = query['error_code']
 
     -- Setup the defaults
     r.content_type = "text/html"
     r.status = 200
+
+    -- Deal with error codes
+    if error_code == '401' then
+        r.status = 401
+        r:puts(template.Base:new('Unauthorized', 'Unauthorized'):render())
+        return apache2.OK
+    end
 
     -- Connect to the database only for paths that require it
     local dbh

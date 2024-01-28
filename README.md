@@ -72,6 +72,11 @@ You can change the value of `-e 'URL=http://httpd:80'` if you want to test a dif
 
 At the moment the tests don't test login, private directory functionality or server side includes.
 
+To run locally you'll need Python3, Chrome or Chromium, a version of Chromdriver that matches your browser and Python selenium. Then you can run:
+
+```sh
+URL=http://localhost:81 HEADLESS=false python3 test/test.py
+```
 
 ## Curl
 

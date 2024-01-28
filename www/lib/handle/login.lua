@@ -5,7 +5,11 @@ local template = require('template')
 local function get_password_hash(r, dbh, username)
     local statement = assert(dbh:prepared(r, "check_password"))
     local res = assert(statement:select(username))
-    return res(1)[1]
+    local row = res(1)
+    if row then
+        return row[1]
+    end
+    return nil
 end
 
 
@@ -32,15 +36,19 @@ local function create_session(r, dbh, session, username, expiry)
     end
 end
 
-local function handle(r, dbh)
-    if r.method == 'GET' then
-        r.content_type = "text/html"
-        local form = template.HTML:new([[
+
+local form = template.HTML:new([[
+<p>Login</p>
+
 <form method="POST" action="">
   Username: <input type="text" name="httpd_username"><br>
   Password: <input type="password" name="httpd_password"><br>
-  <input type="submit" value="Login">
+  <input name="login" type="submit" value="Login">
 </form>]])
+
+
+local function handle(r, dbh)
+    if r.method == 'GET' then
         r:puts(template.Base:new('Login', form):render())
         return apache2.OK
     elseif r.method == 'POST' then
@@ -51,27 +59,31 @@ local function handle(r, dbh)
         local username = POST['httpd_username']
         local password = POST['httpd_password']
         r:debug(username .. ' - ' .. password)
+        --local result, err = pcall(login, username, password)
 
         local password_hash = get_password_hash(r, dbh, username)
-        r:debug('Actual password hash: ' .. password_hash)
-        r:debug("Lua version: " .. _VERSION)
-
-        local result = bcrypt.verify(password, normalize_bcrypt_hash(password_hash))
-        if result then
-            local session_id = generate_secure_session_id()
-            r:debug('session id: ' .. session_id)
-            r.headers_out['Set-Cookie'] = "session=" .. session_id .. "; Path=/; HttpOnly; SameSite=Lax"
-            local expiry = (os.time() + 1000) * 1000
-            create_session(r, dbh, session_id, username, expiry)
-            r.status = 302
-            r.headers_out['Location'] = '/private'
-            r:puts(template.Base:new('Redirecting', 'Redirecting to /private.'):render())
+        if not password_hash then
+            r:debug('No password hash for user: ' ..username)
+            r:puts(template.Base:new('Login', form):render())
             return apache2.OK
-        else
+        end
+        r:debug('Actual password hash: ' .. password_hash)
+        local result = bcrypt.verify(password, normalize_bcrypt_hash(password_hash))
+        if not result then
             r:debug("Verify failed: " .. password .. ', ' .. password_hash)
             r:debug('NO SESSION ID')
-            return apache2.HTTP_UNAUTHORIZED
+            r:puts(template.Base:new('Login', form):render())
+            return apache2.OK
         end
+        local session_id = generate_secure_session_id()
+        r:debug('session id: ' .. session_id)
+        r.headers_out['Set-Cookie'] = "session=" .. session_id .. "; Path=/; HttpOnly; SameSite=Lax"
+        local expiry = (os.time() + 1000) * 1000
+        create_session(r, dbh, session_id, username, expiry)
+        r.status = 302
+        r.headers_out['Location'] = '/private'
+        r:puts(template.Base:new('Redirecting', 'Redirecting to /private.'):render())
+        return apache2.OK
     end
 end
 

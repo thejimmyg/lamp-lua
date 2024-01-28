@@ -45,9 +45,10 @@ def auto_load_driver():
         from selenium.webdriver.chrome.options import Options
     
         chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-gpu")
+        if os.environ.get('HEADLESS', 'true').lower() == 'true':
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--no-sandbox")
+            chrome_options.add_argument("--disable-gpu")
         driver = webdriver.Chrome(options=chrome_options)
         driver.set_window_size(1920, 1080)
         # It is on port 80 internally on the docker network for some reason
@@ -113,6 +114,17 @@ def wait_for_element_to_have_text(driver, selector, expected_text):
     return driver.find_element(By.CSS_SELECTOR, selector).text
 
 
+def wait_for_element_to_include_text(driver, selector, expected_text):
+    locator = (By.CSS_SELECTOR, selector)
+    wait = WebDriverWait(driver, 10)
+    try:
+        wait.until(EC.text_to_be_present_in_element(locator, expected_text))
+    except:
+        print(driver.page_source)
+        raise
+    return driver.find_element(By.CSS_SELECTOR, selector).text
+
+
 def main():
     driver = auto_load_driver()
     screenshot(driver)
@@ -170,9 +182,65 @@ def main():
     passed(driver)
 
 
+    # Need to test login, logout and private.
+    navigate(driver, "#nav-private-link")
+    expected = 'Unauthorized'
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
+    passed(driver)
+
+    navigate(driver, "#nav-login-link")
+    expected = 'Login'
+    actual = wait_for_element_to_include_text(driver, "article", expected)
+    assert expected in actual, actual
+    login(driver, 'james', 'wrong-password')
+    actual = wait_for_element_to_include_text(driver, "article", expected)
+    assert expected in actual, actual
+    login(driver, 'james', '123123')
+    expected = 'Private'
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
+    passed(driver)
+
+    navigate(driver, "#nav-private-link")
+    expected = 'Private'
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
+    passed(driver)
+
+    navigate(driver, "#nav-logout-link")
+    expected = 'Logged out successfully.'
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
+    passed(driver)
+
+    navigate(driver, "#nav-private-link")
+    expected = 'Unauthorized'
+    actual = wait_for_element_to_have_text(driver, "article", expected)
+    assert expected == actual, actual
+    passed(driver)
+
+
     driver.quit()
     print('\nSUCCESS')
     print('See the screenshots directory.')
+
+
+def login(driver, username, password):
+    # Find the <article> tag
+    article = driver.find_element(By.TAG_NAME, 'article')
+
+    # Find the username and password input fields within the <article> tag
+    username_field = article.find_element(By.NAME, 'httpd_username')
+    password_field = article.find_element(By.NAME, 'httpd_password')
+
+    # Enter the username and password
+    username_field.send_keys(username)
+    password_field.send_keys(password)
+
+    # Find and click the login button
+    login_button = article.find_element(By.NAME, 'login')
+    login_button.click()
 
 
 if __name__ == '__main__':
