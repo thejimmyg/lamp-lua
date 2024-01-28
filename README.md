@@ -6,7 +6,7 @@ The approach in this project is to use domain specific languages for domain spec
 * Ops - [Docker](https://www.docker.com/products/docker-desktop/)
 * CSS - [CSS Grid](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout) and [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties)
 * Tests - [Python 3.11](http://python.org) driving [Selenium WebDriver](https://selenium-python.readthedocs.io/) with Chrome, and also support to call an [Appium](http://appium.io/docs/en/2.4/) server for mobile testing
-* JSON - [JSON Function in SQL](https://mariadb.com/kb/en/json-functions/) with [MariaDB 10.8.3](https://mariadb.com/kb/en/documentation/) via a small [PHP adapter](code/db.php) with a [phpMyAdmin](https://www.phpmyadmin.net/) admin interface
+* JSON - [JSON Function in SQL](https://mariadb.com/kb/en/json-functions/) with [MariaDB 10.8.3](https://mariadb.com/kb/en/documentation/) with a [phpMyAdmin](https://www.phpmyadmin.net/) admin interface
 * Apps - React Native Webview and Electron calling the existing HTML site with a bridge to native functionality
 
 The idea is that the resulting application can be deployed on commodity VPS hosting as well as production cloud infrastructure, but that there isn't anything needed for development except Docker. This should lower the barriers to contribution and to deployment.
@@ -63,7 +63,7 @@ docker-compose build test && mkdir -p screenshots && docker-compose --profile te
 ```
 Creating lamp-lua_test_run ... done
 Testing against: http://httpd:80
-......
+.......
 SUCCESS
 See the screenshots directory.
 ```

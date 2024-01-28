@@ -135,6 +135,16 @@ function Base:render()
 end
 
 
+
+local Error = setmetatable({}, Base)
+
+function Error:new(err_msg)
+    local newObj = setmetatable(Base:new('Error', err_msg), self)
+    self.__index = self
+    return newObj
+end
+
+
 -- Command-line execution example
 
 if arg then
@@ -163,6 +173,7 @@ end
 local M = {
     HTML = HTML,
     Base = Base,
+    Error = Error,
     top_shtml = top_shtml,
     body_shtml = body_shtml,
     bottom_shtml = bottom_shtml,
