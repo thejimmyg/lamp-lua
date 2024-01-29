@@ -10,6 +10,11 @@ const urlsToCache = [
   '/app.js',
   '/offline.html',
   '/offline.js',
+  // "/icons/apple-touch-icon-180x180.png",
+  // "/icons/icon-32x32.png",
+  // "/icons/icon-16x16.png",
+  // "/icons/icon-192x192.png",
+  // "/icons/safari-pinned-tab.svg",
 ];
 const excludeFromCache = new Set([...urlsToCache]);
 

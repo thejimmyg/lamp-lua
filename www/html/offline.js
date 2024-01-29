@@ -1,3 +1,20 @@
+const excludeFromOffline = new Set([
+    '/app.js',
+    '/init.js',
+    '/manifest.json',
+    '/offline.html',
+    '/offline.js',
+    '/service-worker.js',
+    '/style.css',
+    "/icons/apple-touch-icon-180x180.png",
+    "/icons/icon-32x32.png",
+    "/icons/icon-16x16.png",
+    "/icons/icon-192x192.png",
+    "/icons/safari-pinned-tab.svg",
+    "favicon.ico",
+    // ... other URLs to exclude
+]);
+
 async function populateOfflineLinks() {
   const offlineDiv = document.getElementById('offline-accessible');
   if (!offlineDiv) {
@@ -17,7 +34,7 @@ async function populateOfflineLinks() {
       const cachedResponses = await cache.keys();
 
       for (const request of cachedResponses) {
-        if (!cacheItems.has(request.url)) {
+        if (!cacheItems.has(request.url) && !excludeFromOffline.has(new URL(request.url).pathname)) {
           const response = await cache.match(request);
           const contentType = response.headers.get('Content-Type');
           cacheItems.set(request.url, { contentType, response });
