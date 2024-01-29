@@ -1,6 +1,6 @@
 :root {
   --spacing: 1em;
-  --light: #eee;
+  --light: #fff;
   --dark: #ccc;
 }
 
@@ -22,8 +22,8 @@ footer {
 article {
   grid-area: article;
   background-color: var(--light);
-  overflow-wrap: break-word;
-  word-break: break-all;
+  /* overflow-wrap: break-word;*/
+  /* word-break: break-all;*/
 }
 
 nav {
@@ -40,7 +40,7 @@ body {
   grid-auto-rows: minmax(100px, auto);
   grid-template-areas:
     "header  header  header  header   header   header   header   header   header"
-    "nav     nav     nav     article  article  article  article  article  article"
+    "nav     article article article  article  article  article  article  article"
     "footer  footer  footer  footer   footer   footer   footer   footer   footer";
 }
 
@@ -140,4 +140,26 @@ body {
   .menu-toggle:checked + .menu-icon::after {
     transform: translateX(-50%) translateY(-8px) rotate(-45deg);
   }
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    font-weight: bold;
+}
+
+td, th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+    
+thead tr:nth-child(1) {
+    background-color: #ccc;
+}
+td, th {
+    vertical-align: top; /* Align content to the top */
 }

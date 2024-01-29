@@ -109,12 +109,11 @@ To create new users:
 docker-compose run httpd /usr/bin/user.sh james
 ```
 
-## htmx
 
-By default htmx is loaded from the CDN. If you want to load it yourself, you can get the latest version with:
+## Benchmarking
 
 ```sh
-curl https://unpkg.com/htmx.org/dist/htmx.min.js -L -o www/html/htmx.min.js
+wrk -d 10 -c 36 -t 4 http://localhost:81/db
 ```
 
-Then update the `top_shtml` variable in `var/lib/index.lua` to set the script tag.
+On my machine I get about 17,000 requests a second with no errors.

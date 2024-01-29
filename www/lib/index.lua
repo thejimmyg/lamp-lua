@@ -57,17 +57,17 @@ function handle(r)
             local err_msg = 'Could not acquire a db connection'
             r:debug(err_msg .. ': ' .. dbh_err)
             r.status = 500
-            r:puts(template.Error:new(err_msg))
+            r:puts(template.Error:new(err_msg):render())
             return apache2.OK
         end
     end
 
     -- Render the page or an error
-    local success, err = pcall(handle_paths, r, path, dbh)
+    local success, result = pcall(handle_paths, r, path, dbh)
     if not success then
-        r:err(err)
+        r:err('Error ' .. path)
         r.status = 500
-        r:puts(template.Error:new(err.msg or 'Internal server error'):render())
+        r:puts(template.Error:new('Internal server error'):render())
         return apache2.OK
     end
 
@@ -77,5 +77,8 @@ function handle(r)
     end
 
     -- Return the result
-    return result
+    if result ~= apache2.OK then
+        r:err('Path ' .. path .. ' returned ' .. tostring(result) .. ' but we expected ' .. tostring(apache2.OK))
+    end
+    return apache2.OK
 end

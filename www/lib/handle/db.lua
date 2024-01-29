@@ -2,7 +2,7 @@ local template = require('template')
 
 
 local function handle(r, dbh)
-    local statement = assert(dbh:prepared(r, "index"))
+    local statement = assert(dbh:prepared(r, "db"))
     local res = assert(statement:select())
     local data = res(1)[1]
     assert(data, 'No data from database')

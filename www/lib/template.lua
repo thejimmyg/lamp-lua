@@ -46,16 +46,16 @@ end
 local top_shtml = HTML:new([[<!doctype html>
 <html lang="en-US">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="stylesheet" href="/styles.css">
-    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="manifest" href="/manifest.json">
 ]])
 
 
 -- End of head and start of body, including the htmx hx-boost parameter for PJAX
 local body_shtml = HTML:new([[  </head>
-  <body hx-boost="true">
+  <body>
 ]])
 
 
@@ -73,18 +73,22 @@ local bottom_shtml = HTML:new([[    <input type="checkbox" id="menu-toggle" clas
       <a href="/404" id="nav-example-404-link">Not Found</a>
     </nav>
     <footer>Footer</footer>
-    <script>
-    // Without this, error pages don't appear to the user to get loaded
-    document.body.addEventListener('htmx:beforeOnLoad', function (evt) {
-        if (evt.detail.xhr.status === 404 || evt.detail.xhr.status === 500) {
-            evt.detail.shouldSwap = true;
-            evt.detail.isError = false;
-        }
-    });
-    </script>
+    <script src="/init.js"></script>
+    <script src="/app.js"></script>
   </body>
 </html>]])
 
+
+--    <script>
+--    // Without this, error pages don't appear to the user to get loaded
+--    document.body.addEventListener('htmx:beforeOnLoad', function (evt) {
+--        if (evt.detail.xhr.status === 404 || evt.detail.xhr.status === 500) {
+--            evt.detail.shouldSwap = true;
+--            evt.detail.isError = false;
+--        }
+--    });
+--    </script>
+--    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
 
 -- Base class for templating
 
