@@ -1,6 +1,6 @@
- <!--#include virtual="/include/top.shtml" --> 
+ <!--#include virtual="/include/top.shtml" -->
     <title>Privtate</title>
- <!--#include virtual="/include/body.shtml" --> 
+ <!--#include virtual="/include/body.shtml" -->
     <header>
       Private
     </header>
@@ -8,4 +8,4 @@
       Private
     </article>
     <footer>Footer</footer>
- <!--#include virtual="/include/bottom.shtml" --> 
+ <!--#include virtual="/include/bottom.shtml" -->

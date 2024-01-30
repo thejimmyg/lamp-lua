@@ -43,13 +43,21 @@ end
 -- Example HTML segments
 
 -- Top part of the HTML document
-local top_shtml = HTML:new([[<!doctype html>
+local top_shtml = HTML:new([[<!DOCTYPE html>
 <html lang="en-US">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/style.css">
     <link rel="manifest" href="/manifest.json">
+    <!--<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5"> -->
+    <meta name="apple-mobile-web-app-title" content="App">
+    <meta name="application-name" content="App">
+    <meta name="theme-color" content="#ffffff">
 ]])
 
 
@@ -73,7 +81,6 @@ local bottom_shtml = HTML:new([[    <input type="checkbox" id="menu-toggle" clas
       <a href="/404" id="nav-example-404-link">Not Found</a>
     </nav>
     <footer>Footer</footer>
-    <script src="/init.js"></script>
     <script src="/app.js"></script>
   </body>
 </html>]])

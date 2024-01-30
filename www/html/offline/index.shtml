@@ -1,10 +1,10 @@
 <!--#include virtual="/include/top.shtml" -->
-    <title>Home</title>
+    <title>Offline</title>
 <!--#include virtual="/include/body.shtml" -->
     <header>
-      Example
+      Offline
     </header>
     <article>
-      Example
+      <div id="offline-accessible">Loading content you can still access ...</div>
     </article>
 <!--#include virtual="/include/bottom.shtml" -->

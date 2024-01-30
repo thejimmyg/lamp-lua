@@ -55,15 +55,24 @@ navigator.serviceWorker.addEventListener('message', event => {
   console.log('Page got event from service worker:', event);
 });
 
-if (navigator.serviceWorker) {
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    // The new service worker has taken control
-    console.log("A new service worker is controlling the page!");
-    // You might want to refresh the page, display a notification to the user, etc.
-  });
-}
 
 if (navigator.serviceWorker) {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      // The new service worker has taken control
+      console.log("A new service worker is controlling the page!");
+      // You might want to refresh the page, display a notification to the user, etc.
+    });
+
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+            // Registration was successful
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function(err) {
+            // Registration failed
+            console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+
     // Listen for messages from the service worker
     navigator.serviceWorker.addEventListener('message', event => {
         console.log('Page got message:', event);
