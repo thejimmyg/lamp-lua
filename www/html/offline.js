@@ -28,16 +28,22 @@ async function populateOfflineLinks() {
     cacheNames.sort().reverse(); // Assuming higher version numbers are 'greater'
 
     let cacheItems = new Map();
-
+    
     for (const cacheName of cacheNames) {
       const cache = await caches.open(cacheName);
       const cachedResponses = await cache.keys();
-
+    
       for (const request of cachedResponses) {
         if (!cacheItems.has(request.url) && !excludeFromOffline.has(new URL(request.url).pathname)) {
           const response = await cache.match(request);
           const contentType = response.headers.get('Content-Type');
-          cacheItems.set(request.url, { contentType, response });
+          const statusOk = response.status === 200;
+          const hasXTimestamp = response.headers.has('x-timestamp');
+    
+          // Only add the item if it's a 200 OK response and has an x-timestamp header
+          if (statusOk && hasXTimestamp) {
+            cacheItems.set(request.url, { contentType, response });
+          }
         }
       }
     }

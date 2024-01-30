@@ -1,6 +1,6 @@
 console.log("In the service-worker.js file");
 
-// Code cache bust: 1
+// Code cache bust: 5
 
 const CACHE_NAME = 'app-cache-v1';
 let latestRequestTimestamps = {};
@@ -57,7 +57,11 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('Opened cache');
-        return cache.addAll(urlsToCache);
+        return cache.addAll(urlsToCache).then(res => {
+          console.log('Sending the check version check ...');
+          broadcastMessage({ type: 'CHECK_VERSION' });
+          return res
+        })
       })
   );
 });
@@ -111,10 +115,52 @@ self.addEventListener('activate', event => {
             return caches.delete(cacheName);
           }
         })
-      );
+      ).then(e => {
+          console.log('Activate finished');
+      });
     })
   );
 });
 
-console.log("At the end of the service-worker.js file");
 
+
+console.log("At the skipWaiting check code");
+
+let clientsReadyToUpdate = new Map();
+
+self.addEventListener('message', async event => {
+  console.log('Got message back:', event)
+  const clientId = event.source.id;
+  const message = event.data;
+
+  if (message.type === 'VERSION_CHECK') {
+    clientsReadyToUpdate.set(clientId, message.isReadyToUpdate);
+    
+    const allClients = await clients.matchAll({ includeUncontrolled: true });
+    const allAgreeToUpdate = allClients.every(client => clientsReadyToUpdate.get(client.id));
+
+    if (allAgreeToUpdate) {
+      console.log('Calling skipWaiting() because all clients agree to skip', self);
+      self.skipWaiting().then(e => {
+        console.log('Called skipWaiting() successfully', e);
+        return self.clients.claim().then(e => {console.log('All clients claimed')});
+      }).catch(e => {console.log(e)});
+    } else {
+      console.log('Cannot skipWaiting() because some clients do not agree');
+    }
+  }
+});
+
+function broadcastMessage(message) {
+  console.log('Broadcasting message ...');
+  clients.matchAll({ type: 'window', includeUncontrolled: true }).then(allClients => {
+    console.log('Broadcasting message to', allClients);
+    allClients.forEach(client => {
+      console.log('Sending', message, 'to', client);
+      client.postMessage(message);
+    });
+  });
+}
+
+
+console.log("At the end of the service-worker.js file");
