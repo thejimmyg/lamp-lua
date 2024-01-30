@@ -63,11 +63,6 @@ attachListeners();
 // fetchAndUpdateContent(window.location.href);
 
 
-navigator.serviceWorker.addEventListener('message', event => {
-  console.log('Page got event from service worker:', event);
-});
-
-
 if (navigator.serviceWorker) {
     window.addEventListener('load', function() {
         navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
@@ -96,11 +91,21 @@ if (navigator.serviceWorker) {
               console.log('Page got registration.')
               if (registration && registration.waiting) {
                   // Send a message to the waiting service worker to activate
-                  console.log('Page posted back to waiting service worker', isReadyToUpdate);
+                  console.log('Service worker registration is viewed as waiting from the page')
                   registration.waiting.postMessage({
                     type: 'VERSION_CHECK',
                     isReadyToUpdate: isReadyToUpdate
                   });
+                  console.log('Page posted back to waiting service worker', isReadyToUpdate);
+              } else if (registration.active) {
+                  console.log('Service worker registration is viewed as active from the page, but perhaps it is not claimed?')
+                  // Send a message to the waiting service worker to activate
+                  registration.active.postMessage({
+                    type: 'VERSION_CHECK',
+                    isReadyToUpdate: isReadyToUpdate,
+                    checkCache: true,
+                  });
+                  console.log('Page posted back to waiting service worker', isReadyToUpdate);
               }
           });
         }

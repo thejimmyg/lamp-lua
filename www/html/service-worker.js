@@ -1,6 +1,7 @@
 // Problems
 // There is no retry if activation fails the first time
 // There is no way to see the offline content unless offline visiting a page that doesn't exist
+// Sometimes skipWaiting() seems to get called more than once
 
 console.log("In the service-worker.js file");
 
@@ -9,6 +10,7 @@ console.log("In the service-worker.js file");
 const OFFLINE_PAGE_URL = '/offline/';
 const APP_CACHE_NAME = 'app-cache-v1';
 const URL_CACHE_NAME = 'url-cache-v1';
+
 let latestRequestTimestamps = {};
 const urlsToCache = [
   '/style.css',
@@ -39,6 +41,7 @@ const excludeFromOffline = new Set([
 
 async function cacheWithTimestampCheck(request, responseClone, requestTimestamp) {
   if (excludeFromCache.has(new URL(request.url).pathname)) {
+    console.log('Not caching "' +(new URL(request.url).pathname) + '" because it is an excluded path');
     return;
   }
 
@@ -49,6 +52,7 @@ async function cacheWithTimestampCheck(request, responseClone, requestTimestamp)
                           : 0;
 
   if (requestTimestamp >= (latestRequestTimestamps[request.url] || 0) && requestTimestamp >= cachedTimestamp) {
+    console.log('Going to cache content for "' +(new URL(request.url).pathname) + '"');
     const responseHeaders = new Headers(responseClone.headers);
     responseHeaders.append('x-timestamp', requestTimestamp.toString());
     const responseToCache = new Response(responseClone.body, {
@@ -57,6 +61,7 @@ async function cacheWithTimestampCheck(request, responseClone, requestTimestamp)
       headers: responseHeaders
     });
     await cache.put(request, responseToCache);
+    console.log('Successfully cached content for "' +(new URL(request.url).pathname) + '"');
   }
 }
 
@@ -210,6 +215,7 @@ console.log("At the skipWaiting check code");
 
 let clientsReadyToUpdate = new Map();
 
+
 self.addEventListener('message', async event => {
   console.log('Got message back:', event)
   const clientId = event.source.id;
@@ -220,11 +226,29 @@ self.addEventListener('message', async event => {
 
     const allClients = await clients.matchAll({ includeUncontrolled: true });
     const allAgreeToUpdate = allClients.every(client => clientsReadyToUpdate.get(client.id));
+    const checkCache = message.checkCache;
 
     if (allAgreeToUpdate) {
       console.log('Calling skipWaiting() because all clients agree to skip', self);
       self.skipWaiting().then(e => {
         console.log('Called skipWaiting() successfully', e);
+        if (checkCache) {
+            console.log('Checking and caching current page');
+            clients.get(clientId).then(client => {
+                if (client) {
+                    const clientUrl = new URL(client.url);
+                    console.log('Caching the URL that loaded the service worker:', clientUrl.href);
+                    // Create a new request object based on the URL
+                    const request = new Request(clientUrl.href);
+                    fetch(request).then(response => {
+                        if (response.status === 200) {
+                            // Pass the original request object and the cloned response
+                            cacheWithTimestampCheck(request, response.clone(), Date.now());
+                        }
+                    }).catch(e => console.error('Error caching current page:', e));
+                }
+            })
+        }
         return self.clients.claim().then(e => {console.log('All clients claimed')});
       }).catch(e => {console.log(e)});
     } else {
