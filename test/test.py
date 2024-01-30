@@ -88,8 +88,7 @@ def navigate(driver, link_selector):
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
+from selenium.common.exceptions import StaleElementReferenceException
 
 
 class text_to_be_exact_stripping_whitespace(object):
@@ -98,10 +97,24 @@ class text_to_be_exact_stripping_whitespace(object):
         self.text = text_
 
     def __call__(self, driver):
-        element_text = driver.find_element(*self.locator).text
-        # print(element_text.strip(), self.text)
-        return element_text.strip() == self.text
+        try:
+            element_text = driver.find_element(*self.locator).text
+            return element_text.strip() == self.text
+        except StaleElementReferenceException:
+            return False  # This will cause the wait to retry locating and checking the element
 
+
+class text_to_be_present(object):
+    def __init__(self, locator, text_):
+        self.locator = locator
+        self.text = text_
+
+    def __call__(self, driver):
+        try:
+            element_text = driver.find_element(*self.locator).text
+            return self.text in element_text
+        except StaleElementReferenceException:
+            return False  # This will cause the wait to retry locating and checking the element
 
 def wait_for_element_to_have_text(driver, selector, expected_text):
     locator = (By.CSS_SELECTOR, selector)
@@ -118,7 +131,7 @@ def wait_for_element_to_include_text(driver, selector, expected_text):
     locator = (By.CSS_SELECTOR, selector)
     wait = WebDriverWait(driver, 10)
     try:
-        wait.until(EC.text_to_be_present_in_element(locator, expected_text))
+        wait.until(text_to_be_present(locator, expected_text))
     except:
         print(driver.page_source)
         raise
@@ -177,7 +190,7 @@ def main():
     actual = wait_for_element_to_have_text(driver, "article", expected)
     assert expected == actual, actual
     assert '<head>' in driver.page_source
-    assert '<body ' in driver.page_source
+    assert '<body' in driver.page_source
     assert '</body>' in driver.page_source
     passed(driver)
 

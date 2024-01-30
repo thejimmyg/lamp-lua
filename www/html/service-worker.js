@@ -26,6 +26,7 @@ const excludeFromOffline = new Set([
     '/favicon.ico',
     '/icons/icon-192x192.png',
     '/login',
+    '/logout',
     '/manifest.json',
     "/icons/apple-touch-icon-180x180.png",
     "/icons/icon-32x32.png",

@@ -3,44 +3,56 @@ const updateUrl = true;
 
 // This function fetches content and updates the page body
 function fetchAndUpdateContent(url) {
-    fetch(url)
-        .then(response => response.text()) // Get the response text regardless of the status code
+    return fetch(url)
+        .then(response => response.text())
         .then(html => {
             if (!html) {
-                // Handle the case where there's genuinely no content
                 document.body.innerHTML = '<p>No content available to display.</p>';
+                console.log('Setting title to "No Content"');
+                document.title = 'No Content'; // Update the title
                 return;
             }
-            // Update the page content
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
+
+            const title = doc.querySelector('title') ? doc.querySelector('title').innerText : 'Default Title';
+            console.log('Setting title based on actual page content to:', title);
+            document.title = title; // Update the title
             document.body.innerHTML = doc.body.innerHTML;
+
             attachListeners();
         })
         .catch(error => {
             console.error('Fetch error:', error);
             document.body.innerHTML = '<p>Error loading content.</p>';
-            // Optionally, handle the error more gracefully here
+            document.title = 'Error'; // Update the title
         });
 }
+
 
 // Attach event handlers to links
 function attachListeners() {
     document.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', function(event) {
             event.preventDefault();
-            const href = event.target.href;
-            if (updateUrl) {
-                history.pushState({}, '', href);
-            }
-            fetchAndUpdateContent(href);
+            const href = this.href;
+            console.log('Current page title is:', document.title, ', about to navigate');
+            fetchAndUpdateContent(href).then(() => {
+                if (updateUrl) {
+                    console.log('Pushing a history entry for "'+href+'", with title', document.title);
+                    history.pushState({ title: document.title }, document.title, href);
+                }
+            });
         });
     });
 }
 
 // Handle popstate event
 window.addEventListener('popstate', function(event) {
-    // Use the current URL
+    if (event.state && event.state.title) {
+        console.log('Setting title based on popstate to:', event.state.title);
+        document.title = event.state.title;
+    }
     fetchAndUpdateContent(window.location.href);
 });
 
@@ -57,12 +69,6 @@ navigator.serviceWorker.addEventListener('message', event => {
 
 
 if (navigator.serviceWorker) {
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      // The new service worker has taken control
-      console.log("A new service worker is controlling the page!");
-      // You might want to refresh the page, display a notification to the user, etc.
-    });
-
     window.addEventListener('load', function() {
         navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
             // Registration was successful
@@ -71,6 +77,12 @@ if (navigator.serviceWorker) {
             // Registration failed
             console.log('ServiceWorker registration failed: ', err);
         });
+    });
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      // The new service worker has taken control
+      console.log("A new service worker is controlling the page!");
+      // You might want to refresh the page, display a notification to the user, etc.
     });
 
     // Listen for messages from the service worker
